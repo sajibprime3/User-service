@@ -8,6 +8,9 @@ build/
 ### Persistent ###
 h2/
 
+### Environment ###
+.env
+
 ### STS ###
 .apt_generated
 .classpath
