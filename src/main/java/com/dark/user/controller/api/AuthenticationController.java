@@ -1,6 +1,7 @@
 package com.dark.user.controller.api;
 
 import com.dark.user.dto.AuthRequest;
+import com.dark.user.entity.User;
 import com.dark.user.util.JwtUtil;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,11 +33,11 @@ public class AuthenticationController {
     ResponseEntity<String> login(@RequestBody AuthRequest request) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-        UserDetails user = (UserDetails) authentication.getPrincipal();
+        User user = (User) authentication.getPrincipal();
         if (user == null) {
             log.info("Authentication: {}", authentication);
             return ResponseEntity.internalServerError().build();
         }
-        return ResponseEntity.ok(jwtUtil.generateToken(user.getUsername()));
+        return ResponseEntity.ok(jwtUtil.generateTokenWithRole(user.getId().toString(), user.getRoles()));
     }
 }

@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .roles(List.of("user")) // Default Role for everyone.
                 .build();
         User savedUser = userRepository.save(user);
         return userMapper.userToUserDto(savedUser);
