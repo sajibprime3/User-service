@@ -13,6 +13,7 @@ import com.dark.user.mapper.UserMapper;
 import com.dark.user.repository.UserRepository;
 import com.dark.user.service.UserService;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,6 +44,21 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserByUsername(String username) {
         // No error handling. :(
         User user = userRepository.findUserByUsername(username).orElseThrow();
+        return userMapper.userToUserDto(user);
+    }
+
+    @Override
+    public User getUserByUUID(UUID uuid) {
+        User user = userRepository.findById(uuid).orElseThrow();
+        return user;
+    }
+
+    @Override
+    public UserDto getAuthenticatedUser(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        if (user == null) {
+            return null;
+        }
         return userMapper.userToUserDto(user);
     }
 

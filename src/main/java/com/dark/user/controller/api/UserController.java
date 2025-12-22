@@ -9,6 +9,7 @@ import com.dark.user.dto.UserUpdateRequest;
 import com.dark.user.service.UserService;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,15 @@ public class UserController {
     @GetMapping("/u/{username}")
     ResponseEntity<UserDto> getUserInfo(@PathVariable String username) {
         UserDto user = userService.getUserByUsername(username);
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/me")
+    ResponseEntity<UserDto> getSelfInfo(Authentication authentication) {
+        UserDto user = userService.getAuthenticatedUser(authentication);
+        if (user == null) {
+            return ResponseEntity.internalServerError().build();
+        }
         return ResponseEntity.ok(user);
     }
 
