@@ -1,10 +1,16 @@
 package com.dark.user.controller.api;
 
+import java.time.Duration;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import com.dark.user.dto.AuthRequest;
 import com.dark.user.entity.User;
 import com.dark.user.util.JwtUtil;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,14 +36,22 @@ public class AuthenticationController {
     String secret;
 
     @PostMapping("/login")
-    ResponseEntity<String> login(@RequestBody AuthRequest request) {
+    ResponseEntity<String> login(@RequestBody AuthRequest request, HttpServletResponse response) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
         User user = (User) authentication.getPrincipal();
         if (user == null) {
-            log.info("Authentication: {}", authentication);
             return ResponseEntity.internalServerError().build();
         }
-        return ResponseEntity.ok(jwtUtil.generateTokenWithRole(user.getId().toString(), user.getRoles()));
+        String jwt = jwtUtil.generateTokenWithRoles(user.getId().toString(), user.getRoles());
+        ResponseCookie cookie = ResponseCookie.from("JWT", jwt)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(Duration.ofDays(1))
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok(request.username());
     }
 }
